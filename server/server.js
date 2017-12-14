@@ -9,18 +9,20 @@ const port = process.env.PORT ||3000;
 const server = http.createServer(app);
 const io = socketIO(server);
 
+const {generateMessage} = require('./utils/utils');
+
 app.use(express.static(publicPath));
 
 io.on('connect',(socket) => {
     console.log('New User Connected');
 
+    socket.emit("newMessage", generateMessage("Admin", " Welcome to the chat app."));
+
+    socket.broadcast.emit('newMessage', generateMessage('Admin', ' New user joined the chat app.'));    
+
     socket.on('createMessage', (message) => {
         console.log(message);
-        io.emit('newMessage',{
-            from: message.from,
-            text: message.text,
-            timeStamp: new Date().getTime()
-        });
+        io.emit('newMessage',generateMessage(message.from, message.text));
     });
 });
 
