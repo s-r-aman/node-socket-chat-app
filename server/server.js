@@ -9,7 +9,7 @@ const port = process.env.PORT ||3000;
 const server = http.createServer(app);
 const io = socketIO(server);
 
-const {generateMessage} = require('./utils/utils');
+const {generateMessage, generateLocationMessage} = require('./utils/utils');
 
 app.use(express.static(publicPath));
 
@@ -20,10 +20,16 @@ io.on('connect',(socket) => {
 
     socket.broadcast.emit('newMessage', generateMessage('Admin', ' New user joined the chat app.'));    
 
-    socket.on('createMessage', (message) => {
+    socket.on('createMessage', (message, callback) => {
         console.log(message);
         io.emit('newMessage',generateMessage(message.from, message.text));
+        callback('This is confirmation from the server');
     });
+
+    socket.on('createLocationMessage', (location) =>{
+        io.emit('newLocationMessage', generateLocationMessage('User',location.latitude,location.longitude));
+    });
+
 });
 
 
